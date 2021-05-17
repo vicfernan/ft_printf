@@ -6,7 +6,7 @@
 /*   By: vifernan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/05/12 17:25:06 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/05/17 13:43:56 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ char	*ft_char_to_string(char c)
 int	ft_myprint(char *input, va_list args)
 {
 	int 		i;
-	static char *final;
+//	static char *final;
 
 	i = 0;
 	while (input[i] != '\0')
