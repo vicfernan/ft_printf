@@ -6,7 +6,7 @@
 /*   By: vifernan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/05/18 12:54:09 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/05/18 13:56:38 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ int	ft_myprint(char *input, va_list args)
 				}
 				i++;
 			}
-			if (input[i] == '%' && input[i + 1] == 'd')
+			if (input[i] == '%' && (input[i + 1] == 'd' || input[i + 1] == 'i'))
 			{
 				if (!final)
 					final = ft_strdup(ft_itoa(va_arg(args, int)));
@@ -106,10 +106,12 @@ int	ft_printf(const char *input, ...)
 int main()
 {
 	int a = 23;
-	int b = -1;
+	int b = -5;
 	int c = 0;
 	char d = 'V';
 	char *e = "Hola";
 
-	ft_printf("%d %d %d %s %cict%or          \n\n\n\n\n", a, b, c, e, d);
+	ft_printf("%d %i %d %s %cictor          \n\n\n\n\n", a, b, c, e, d);
+	/*-----PRUEBAS-----*/
+	printf("OTRA:%D\n", b);
 }
