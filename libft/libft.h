@@ -6,7 +6,7 @@
 /*   By: vifernan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/08 15:43:49 by vifernan          #+#    #+#             */
-/*   Updated: 2021/04/27 17:49:23 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/05/18 15:39:00 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void			ft_putendl_fd(char *s, int fd);
 void			ft_putnbr_fd(int n, int fd);
 char			*ft_strtrim(char const *s1, char const *set);
 char			**ft_split(char const *s, char c);
-char			*ft_itoa(int n);
+char			*ft_itoa(long long n);
 char			*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 t_list			*ft_lstnew(void *content);
 void 			ft_lstadd_front(t_list **alst, t_list *new);
