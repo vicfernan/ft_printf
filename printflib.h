@@ -6,7 +6,7 @@
 /*   By: vifernan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:39:30 by vifernan          #+#    #+#             */
-/*   Updated: 2021/05/17 12:42:31 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/05/18 12:04:09 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include <fcntl.h>
 # include <unistd.h>
 # include <stdarg.h>
-# include "../libft/libft.h"
+# include "./libft/libft.h"
 
 int ft_printf(const char *, ...);
 
