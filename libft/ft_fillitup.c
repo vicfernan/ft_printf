@@ -1,37 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   printflib.h                                        :+:      :+:    :+:   */
+/*   ft_fillitup.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/05/12 11:39:30 by vifernan          #+#    #+#             */
-/*   Updated: 2021/06/30 16:33:54 by vifernan         ###   ########.fr       */
+/*   Created: 2021/06/29 16:50:55 by vifernan          #+#    #+#             */
+/*   Updated: 2021/06/29 17:24:51 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PRINTF_LIB_H
-# define PRINTF_LIB_H
+#include "libft.h"
 
-# include <stdlib.h>
-# include <stdio.h>
-# include <fcntl.h>
-# include <unistd.h>
-# include <stdarg.h>
-# include "./libft/libft.h"
+char	*ft_fillitup(char c, size_t n)
+{
+	char    *str;
+    int     i;
 
-typedef struct variables{
-	va_list args;
-	int width;
-    int	negative;
-    int	plus;
-	int	zero;
-	int	point;
-	int	asterisk;
-	int	space;
-	int	pad;
-} vari;
+    str = malloc(sizeof(char) * (n + 1));
+    i = n - 1;
+    while (i != 0)
+        str[i--] = c;
+    str[n + 1] = '\0';
 
-int ft_printf(const char *, ...);
-
-#endif
+    return (str);
+}

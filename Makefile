@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vifernan <marvin@42.fr>                    +#+  +:+       +#+         #
+#    By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/08 19:55:57 by vifernan          #+#    #+#              #
-#    Updated: 2021/05/18 13:00:05 by vifernan         ###   ########.fr        #
+#    Updated: 2021/06/30 13:01:04 by vifernan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,16 +22,16 @@ INCLUDES = -I./includes
 
 all: $(NAME)
 
-RED = \033[0;31m
+BCyan = \033[1;36m 
 GREEN = \033[0;32m
 NO_COLOR = \033[0m
 
 $(NAME): $(OBJS)
-	$(MAKE) -C ./libft
-	cp libft/libft.a $(NAME)
-	gcc -c $(CFLAGS) $(INCLUDES) $(SRCS)
-	ar -rcs $(NAME) $(OBJS)
-	@echo "$(GREEN)======[COMPILADO]===== $(NO_COLOR)"
+	@$(MAKE) -C ./libft
+	@cp libft/libft.a $(NAME)
+	@gcc -c $(CFLAGS) $(INCLUDES) $(SRCS)
+	@ar -rcs $(NAME) $(OBJS)
+	@echo "$(GREEN)✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓$(NO_COLOR)"
 
 clean:
 	$(MAKE) clean -C ./libft
@@ -45,7 +45,8 @@ fclean:
 re: fclean all
 
 test: all
-	gcc $(FLAGS) ft_printf.c $(NAME)
-	./a.out | cat -e
+	@gcc $(FLAGS) ft_printf.c $(NAME)
+	@echo "$(BCyan)[EJECUTADO]$(NO_COLOR)"
+	@./a.out | cat -e
 
 .PHONY: all clean fclean re bonus

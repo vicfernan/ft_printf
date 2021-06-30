@@ -3,115 +3,140 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vifernan <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/05/18 13:56:38 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/06/30 17:14:07 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "printflib.h"
+#include <stdio.h>
 
-char	*ft_char_to_string(char c)
+vari	*init_select(vari *select)
 {
-	char *str;
+	select->width = 0;
+	select->zero = 0;
+	select->space = 0;
+	select->point = 0;
+	select->plus = 0;
+	select->pad = 0;
+	select->negative = 0;
+	select->asterisk = 0;
 
-	str = malloc(2 * sizeof(char));
-	*str = c;
-	str[1] = '\0';
-	return (str);
+	return (select);
 }
 
-int	ft_myprint(char *input, va_list args)
+int ft_percent(char *aux, int i, va_list args, vari *select)
 {
-	int 		i;
-	static char *final;
+	int 		length;
 	char		*temp;
+	int 		size;
+	char		c;
 
-
-	i = 0;
-	while (input[i] != '\0')
+	length = 0;
+	select->negative = 0;
+	select->asterisk = 0;
+	size = 0;
+	while (aux[i++] != 'c')
 	{
-		if (input[i] != '%')
+		if (aux[i] == '-')
+			select->negative++;
+		if (aux[i] == '*')
+			select->asterisk++;
+		length++;
+	}
+	if (select->asterisk == 0)
+	{
+		temp = ft_substr(aux, i - length, length);
+		size = ft_atoi(temp);
+		free(temp);
+		if (size < 0)
+			size *= -1;
+	}
+	else
+	{
+		size = va_arg(args, int);
+		if (size < 0)
 		{
-			if (!final)
-				final = ft_strdup(ft_char_to_string(input[i]));
-			else
-			{
-				temp = ft_strjoin(final, ft_char_to_string(input[i]));
-				free(final);
-				final = temp;
-			}
+			size *= -1;
+			select->negative++;
+		}
+	}
+	c = va_arg(args, int);
+	if (size > 1)
+	{
+		if (select->negative > 0)
+		{
+			select->width += write(1, &c, 1);
+			while (size-- > 1)
+				select->width += write(1, " ", 1);
 		}
 		else
 		{
-			if (input[i] == '%' && input[i + 1] == 's')
-			{
-				if (!final)
-					final = ft_strdup(va_arg(args, char*));
-				else
-				{
-					temp = ft_strjoin(final, va_arg(args, char*));
-					free(final);
-					final = temp;
-				}
-				i++;
-			}
-			if (input[i] == '%' && input[i + 1] == 'c')
-			{
-				if (!final)
-					final = ft_strdup(ft_char_to_string(va_arg(args, int)));
-				else
-				{
-					temp = ft_strjoin(final, ft_char_to_string(va_arg(args, int)));
-					free(final);
-					final = temp;
-				}
-				i++;
-			}
-			if (input[i] == '%' && (input[i + 1] == 'd' || input[i + 1] == 'i'))
-			{
-				if (!final)
-					final = ft_strdup(ft_itoa(va_arg(args, int)));
-				else
-				{
-					temp = ft_strjoin(final, ft_itoa(va_arg(args, int)));
-					free(final);
-					final = temp;
-				}
-				i++;
-			}
+			while (size-- > 1)
+				select->width += write(1, " ", 1);
+			select->width += write(1, &c, 1);
 		}
+	}
+	else
+		select->width += write(1, &c, 1);
+	return (length);
+}
+
+
+
+int	myprint(char *aux, va_list args, vari *select)
+{
+	int	length;
+	int	i;
+
+	i = 0;
+	length = 0;
+	while (aux[i] != '\0')
+	{
+		if (aux[i] == '%')
+			i += ft_percent(aux, i, args, select);
+		else
+			select->width += write(1, &aux[i], 1);	
 		i++;
 	}
-	ft_putstr_fd(final, 1);
-	free(final);
-	return (i);
+	return (select->width);
 }
+
+
 
 int	ft_printf(const char *input, ...)
 {
-	va_list		args;
-	int			count;
+	vari	*select;
+	int count;
 	char		*aux;
 
+	select = (vari *)malloc(sizeof(vari));
+	if (!select)
+		return (-1);
+	init_select(select);
 	count = 0;
-	aux = ft_strdup(input);
-	va_start(args, input);
-	ft_myprint(aux, args);
-	va_end(args);
+	aux = (char*)input;
+	va_start(select->args, input);
+	count = myprint(aux, select->args, select);
+	va_end(select->args);
+	free(select);
 	return (count);
 }
 
-int main()
+/*int main()
 {
-	int a = 23;
-	int b = -5;
-	int c = 0;
-	char d = 'V';
-	char *e = "Hola";
+	//int a = 23;
+	//char b = 'i';
+	//char c = 'c';
+	//char d = 'V';
+	//char e = '&';
+	//long l = -8723647987432;
 
-	ft_printf("%d %i %d %s %cictor          \n\n\n\n\n", a, b, c, e, d);
-	/*-----PRUEBAS-----*/
-	printf("OTRA:%D\n", b);
-}
+	//ft_printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
+	//printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
+	//printf("*PRINTF* %d %i %zu %d %s %cictor          \n\n\n\n\n", a, b, l, c, e, d);
+	ft_printf("%*c\n", 2, '0');
+	printf("%*c\n", 2, '0');
+}*/

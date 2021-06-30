@@ -48,6 +48,7 @@ SRCS	= ft_atoi.c \
 		  ft_split.c \
 		  ft_itoa.c \
 		  ft_strmapi.c \
+		  ft_fillitup.c \
 
 SRCS_B	= ft_lstnew.c \
 		  ft_lstadd_front.c \
