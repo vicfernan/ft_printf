@@ -6,7 +6,7 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:39:30 by vifernan          #+#    #+#             */
-/*   Updated: 2021/06/30 16:33:54 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/07/01 15:33:44 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <unistd.h>
 # include <stdarg.h>
 # include "./libft/libft.h"
+# define SPEC "cspdiuxX%"
 
 typedef struct variables{
 	va_list args;

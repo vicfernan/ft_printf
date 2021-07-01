@@ -6,7 +6,7 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/06/30 17:14:07 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/07/01 15:35:55 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,25 +27,24 @@ vari	*init_select(vari *select)
 	return (select);
 }
 
-int ft_percent(char *aux, int i, va_list args, vari *select)
+vari	*reset_select(vari *select)
 {
-	int 		length;
-	char		*temp;
-	int 		size;
-	char		c;
-
-	length = 0;
+	select->zero = 0;
+	select->space = 0;
+	select->point = 0;
+	select->plus = 0;
+	select->pad = 0;
 	select->negative = 0;
 	select->asterisk = 0;
-	size = 0;
-	while (aux[i++] != 'c')
-	{
-		if (aux[i] == '-')
-			select->negative++;
-		if (aux[i] == '*')
-			select->asterisk++;
-		length++;
-	}
+
+	return (select);
+}
+
+int	ft_size_c(char *aux, int i, int length, vari *select, va_list args)
+{
+	int		size;
+	char	*temp;
+
 	if (select->asterisk == 0)
 	{
 		temp = ft_substr(aux, i - length, length);
@@ -63,8 +62,17 @@ int ft_percent(char *aux, int i, va_list args, vari *select)
 			select->negative++;
 		}
 	}
+	return (size);
+}
+
+void	ft_category_c(va_list args, vari *select, char *aux, int length, int i)
+{
+	char 	c;
+	int		size;
+
+	size = ft_size_c(aux, i, length, select, args);
 	c = va_arg(args, int);
-	if (size > 1)
+	if (size > 0)
 	{
 		if (select->negative > 0)
 		{
@@ -81,7 +89,27 @@ int ft_percent(char *aux, int i, va_list args, vari *select)
 	}
 	else
 		select->width += write(1, &c, 1);
-	return (length);
+}
+
+int ft_percent(char *aux, int i, va_list args, vari *select)
+{
+	int 		length;
+
+	length = 0;
+	while (!ft_strchr(SPEC, aux[++i]))
+	{
+		if (aux[i] == '-')
+			select->negative++;
+		if (aux[i] == '*')
+			select->asterisk++;
+		length++;
+	}
+	if (aux[i] == 'c')
+		ft_category_c(args, select, aux, length, i);
+	/*if (aux[i] == 'd')
+		ft_category_d(args, select);*/
+	reset_select(select);
+	return (++length);
 }
 
 
@@ -124,8 +152,8 @@ int	ft_printf(const char *input, ...)
 	free(select);
 	return (count);
 }
-
-/*int main()
+/*
+int main()
 {
 	//int a = 23;
 	//char b = 'i';
@@ -137,6 +165,6 @@ int	ft_printf(const char *input, ...)
 	//ft_printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
 	//printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
 	//printf("*PRINTF* %d %i %zu %d %s %cictor          \n\n\n\n\n", a, b, l, c, e, d);
-	ft_printf("%*c\n", 2, '0');
-	printf("%*c\n", 2, '0');
+	//ft_printf("%10c %5d\n", '0', 8);
+	printf("%-100c\n", '0');
 }*/
