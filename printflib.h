@@ -6,7 +6,7 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:39:30 by vifernan          #+#    #+#             */
-/*   Updated: 2021/07/05 18:19:12 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/07/06 17:23:16 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ typedef struct variables{
     int	negative;
     int	plus;
 	int sign;
+	int z;
+	int number;
 	int	zero;
 	int	point;
 	int	asterisk;

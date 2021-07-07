@@ -6,12 +6,13 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/07/05 18:33:45 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/07/07 13:26:21 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "printflib.h"
 #include <stdio.h>
+#include <limits.h>
 
 vari	*init_select(vari *select)
 {
@@ -22,6 +23,8 @@ vari	*init_select(vari *select)
 	select->sign = 0;
 	select->plus = 0;
 	select->pad = 0;
+	select->z = 0;
+	select->number = 0;
 	select->negative = 0;
 	select->asterisk = 0;
 
@@ -34,8 +37,10 @@ vari	*reset_select(vari *select)
 	select->space = 0;
 	select->point = 0;
 	select->sign = 0;
+	select->number = 0;
 	select->plus = 0;
 	select->pad = 0;
+	select->z = 0;
 	select->negative = 0;
 	select->asterisk = 0;
 
@@ -101,6 +106,8 @@ int	ft_size_d(char *aux, int i, int length, vari *select, va_list args)
 	char	*temp;
 
 	size = 0;
+	if (aux[1] == '0')
+		select->z++;
 	if (select->point > 0)
 	{
 		if (select->plus > 0)
@@ -120,9 +127,16 @@ int	ft_size_d(char *aux, int i, int length, vari *select, va_list args)
 			if ((ft_strchr(temp, '*') > 0 || temp[size] == '*') && select->asterisk--)
 				select->space = va_arg(args, int);
 			else
+			{
+				if (temp[0] == '0')
+					temp[0] = ' ';
 				select->space = ft_atoi(temp);
+			}
 			if (select->space < 0)
+			{
 				select->space *= -1;
+				select->negative++;
+			}
 			free(temp);
 		}
 		temp = ft_substr(aux, select->point + 1, (i - select->point) - 1);
@@ -130,20 +144,55 @@ int	ft_size_d(char *aux, int i, int length, vari *select, va_list args)
 			select->zero = va_arg(args, int);
 		else
 			select->zero = ft_atoi(temp);
+		if (select->zero < 0)
+		{
+			select->zero *= -1;
+			select->negative++;
+		}
 		free(temp);
 		if (select->space > select->zero)
 			size = select->space;
 		else
 			size = select->zero;
 	}
-	
-	if (select->asterisk == 1)
+	/*kcjrbekhrc*/
+	if (select->asterisk > 0 && select->point == 0)
 	{
+		temp = ft_substr(aux, i - length, length);
+		if (temp[0] == '0' || temp[1] == '0')
+			select->z++;
+		free(temp);
 		size = va_arg(args, int);
 		if (size < 0)
 		{
 			size *= -1;
 			select->negative++;
+		}
+	}
+	if (select->asterisk == 0 && select->point == 0)
+	{
+		if (select->plus > 0)
+		{
+			temp = ft_substr(aux, select->plus + 1, (i - select->plus + 1));
+			if (temp[1] == '0')
+				select->z++;
+			size = ft_atoi(temp);
+			free(temp);
+			if (size < 0)
+			{
+				size *= -1;
+				select->negative++; /* check */ 
+			}
+		}
+		else
+		{
+			temp = ft_substr(aux, i - length, length);
+			if (temp[1] == '0')
+				select->z++;
+			size = ft_atoi(temp);
+			free(temp);
+			if (size < 0)
+				size *= -1;
 		}
 	}
 	return (size);
@@ -154,16 +203,21 @@ void	ft_category_d(va_list args, vari *select, char *aux, int length, int i)
 	char	*inter;
 	int		size;
 	int		z;
-
+	int		number;
+	
 	size = ft_size_d(aux, i, length, select, args);
-	z = va_arg(args, int);
-	if (z < 0)
+	number = va_arg(args, int);
+	if (number == 0)
+		select->number++;
+	if (number < 0 && number != INT_MIN)
 	{
 		select->plus++;
 		select->sign++;
-		z *= -1;
+		number *= -1;
 	}
-	inter = ft_itoa(z);
+	inter = ft_itoa(number);
+	if (select->number > 0 && select->space > 0 && select->zero == 0)
+		inter[0] = ' ';
 	z = 0;
 	if (size > (int)ft_strlen(inter))
 	{
@@ -171,7 +225,7 @@ void	ft_category_d(va_list args, vari *select, char *aux, int length, int i)
 		{
 			if (select->point > 0)
 			{
-				if (select->zero > select->space && select->plus > 0)
+				if (select->zero >= select->space && select->plus > 0)
 					size++;
 				if (select->plus > 0 && size--)
 				{
@@ -187,12 +241,27 @@ void	ft_category_d(va_list args, vari *select, char *aux, int length, int i)
 				while (size-- > 0)
 					select->width += write(1, " ", 1);
 			}
+			else
+			{
+				if ((select->plus > 0 || select->sign > 0))
+				{
+					if (select->sign > 0)
+						select->width += write(1, "-", 1);
+					else
+						select->width += write(1, "+", 1);
+					size--;
+				}
+				while (inter[z] != '\0' && size--)
+					select->width += write(1, &inter[z++], 1);
+				while (size-- > 0)
+					select->width += write(1, " ", 1);
+			}
 		}
 		else
 		{
 			if (select->point > 0)
 			{
-				if (select->space < select->zero && select->plus > 0)
+				if (select->space <= select->zero && select->plus > 0)
 					size++;
 				if (select->space > select->zero && select->plus > 0)
 					select->space--;
@@ -227,8 +296,45 @@ void	ft_category_d(va_list args, vari *select, char *aux, int length, int i)
 				while (size-- > 0)
 					select->width += write(1, "0", 1);
 			}
+			else
+			{
+				if (select->z > 0)
+				{
+					if (select->plus > 0 || select->sign > 0)
+						size--;
+					if ((select->plus > 0 || select->sign > 0))
+					{
+						if (select->sign > 0)
+							select->width += write(1, "-", 1);
+						else
+							select->width += write(1, "+", 1);
+					}
+					while (size-- > (int)ft_strlen(inter))
+						select->width += write(1, "0", 1);
+					while (inter[z] != '\0')
+						select->width += write(1, &inter[z++], 1);
+				}
+				else
+				{
+					if (select->plus > 0 || select->sign > 0)
+						size--;
+					while (size-- > (int)ft_strlen(inter))
+						select->width += write(1, " ", 1);
+					if ((select->plus > 0 || select->sign > 0))
+					{
+						if (select->sign > 0)
+							select->width += write(1, "-", 1);
+						else
+							select->width += write(1, "+", 1);
+					}
+					while (inter[z] != '\0')
+						select->width += write(1, &inter[z++], 1);
+				}
+			}
 		}
 	}
+	else if (select->number > 0 && size == 0 && (select->point > 0 || select->asterisk > 0))
+		select->number++;
 	else
 	{
 		if (select->plus > 0)
@@ -260,12 +366,12 @@ int ft_percent(char *aux, int i, va_list args, vari *select)
 		if (aux[i] == '.')
 			select->point = i;
 		if (aux[i] == '+')
-			select->plus++;
+			select->plus = i;
 		length++;
 	}
 	if (aux[i] == 'c')
 		ft_category_c(args, select, aux, length, i);
-	if (aux[i] == 'd')
+	if (aux[i] == 'd' || aux[i] == 'i')
 		ft_category_d(args, select, aux, length, i);
 	reset_select(select);
 	return (++length);
@@ -316,6 +422,8 @@ int main()
 	//char d = 'V';
 	//char e = '&';
 	//long l = -8723647987432;
+	//int count;
+	//int count2;
 
 	//ft_printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
 	//printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
@@ -323,6 +431,11 @@ int main()
 	//ft_printf("%1*0d\n", 400);
 	//ft_printf("%*.*d\n", 5, 25, 400);
 	//printf("%*.*d\n", 5, 25, 400);
-	ft_printf(" %-3.2d %10.42d\n", 1, -1);
-	printf(" %-3.2d %10.42d\n", 1, -1);
+	//ft_printf(" %100.d\n", 0);
+	//printf(" %100.d\n", 0);
+	//ft_printf(" %.d\n", 0);
+	//printf(" %.d\n", 0);
+	//prinf("%d", UINT_MAX);
+	ft_printf("%.*d\n", -1, 0);
+	printf("%.*d\n", -8, 0);
 }*/
