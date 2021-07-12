@@ -6,7 +6,7 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/07/07 17:31:34 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/07/12 18:54:11 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,7 @@ void	ft_check_sign(vari *select)
 		select->width += write(1, "+", 1);
 }
 
-char	*ft_value(va_list args, vari *select)
+char	*ft_value_d(va_list args, vari *select)
 {
 	int		number;
 	char	*inter;
@@ -382,7 +382,7 @@ void	ft_category_d(va_list args, vari *select, char *aux, int length, int i)
 	int		size;
 	
 	size = ft_size_d(aux, i, length, select, args);
-	inter = ft_value(args, select);
+	inter = ft_value_d(args, select);
 	if (size > (int)ft_strlen(inter))
 	{
 		if (select->negative > 0)
@@ -407,6 +407,139 @@ void	ft_category_d(va_list args, vari *select, char *aux, int length, int i)
 
 /*--- end print d ---*/
 
+/*---START P---*/
+
+
+int	ft_size_p(char *aux, int i, int length, vari *select, va_list args)
+{
+	int		size;
+
+	size = 0;
+	if (aux[1] == '0')
+		select->z++;
+	if (select->point > 0)
+	{
+		if (select->plus > 0)
+			select->space = ft_point_p_sp(aux, i, length, select, args, size);
+		else
+			select->space = ft_point_sp(aux, i, length, select, args, size);
+		select->zero = ft_point_z(aux, i, select, args, size);
+		if (select->space > select->zero)
+			size = select->space;
+		else
+			size = select->zero;
+	}
+
+	if (select->asterisk > 0 && select->point == 0)
+		size = ft_ast(aux, i, length, select, args, size);
+	if (select->asterisk == 0 && select->point == 0)
+		size = ft_nast_npoint(aux, i, length, select, size);
+	return (size);
+}
+
+int		ft_numerlen(unsigned long long number)
+{
+	int i;
+
+	i = 0;
+	while (number >= 10)
+	{
+		number /= 10;
+		i++;
+	}
+	i++;
+	return (i);
+}
+
+char	*ft_p_hexa(char *inter, char *aux, int x)
+{
+	char	*hexa_g;
+	int		i;
+	int		j;
+
+	i = ft_strlen(inter);
+	if (aux[x] == 'p')
+	{
+		hexa_g = malloc((i + 2) * sizeof(char));
+		hexa_g[0] = '0';
+		hexa_g[1] = 'x';
+		j = 2;
+	}
+	else
+	{
+		hexa_g = malloc(i * sizeof(char));
+		j = 0;
+	}
+	while (i-- > 0)
+		hexa_g[j++] = inter[i];
+	free(inter);
+	return (hexa_g);
+}
+
+char	*ft_value_p(va_list args, char *aux, int x, vari *select)
+{
+	unsigned long long		number;
+	char					*inter;
+	char					*hexa;
+	int						i;
+
+	if (aux[x] == 'X')
+		hexa = "0123456789ABCDEF";
+	else
+		hexa = "0123456789abcdef";
+	if (aux[x] == 'X' || aux[x] == 'x')
+		number = (unsigned int) va_arg(args, void *);
+	else
+		number = (unsigned long long) va_arg(args, void *);
+	if (number == 0)
+		select->number++;
+	inter = malloc(ft_numerlen(number) + 1 * sizeof(char));
+	i = 0;
+	while (number >= 16)
+	{
+		inter[i++] = hexa[number % 16];
+		number = number / 16;
+	}
+	inter[i++] = hexa[number % 16];
+	inter[i] = '\0';
+	inter = ft_p_hexa(inter, aux, x);
+	if (select->number > 0 && select->space > 0 && select->zero == 0)
+		inter[0] = ' ';
+	return (inter);
+}
+
+void	ft_category_p(va_list args, vari *select, char *aux, int length, int i)
+{
+	char	*inter;
+	int		size;
+
+
+	size = ft_size_p(aux, i, length, select, args);
+	inter = ft_value_p(args, aux, i, select);
+	if (aux[i] == 'p')
+		select->z = 0;
+	if (size > (int)ft_strlen(inter))
+	{
+		if (select->negative > 0)
+		{
+			if (select->point > 0)
+				ft_s_neg_point(select, size, inter);
+			else
+				ft_s_neg(select, size, inter);
+		}
+		else
+		{
+			if (select->point > 0)
+				ft_neg_point(select, size, inter);	
+			else
+				ft_z_check(select, size, inter);
+		}
+	}
+	else
+		ft_nosize_d(select, inter, size);
+	free(inter);
+}
+/*---end P---*/
 int ft_percent(char *aux, int i, va_list args, vari *select)
 {
 	int 		length;
@@ -428,6 +561,8 @@ int ft_percent(char *aux, int i, va_list args, vari *select)
 		ft_category_c(args, select, aux, length, i);
 	if (aux[i] == 'd' || aux[i] == 'i')
 		ft_category_d(args, select, aux, length, i);
+	if (aux[i] == 'p' || aux[i] == 'x' || aux[i] == 'X')
+		ft_category_p(args, select, aux, length, i);
 	reset_select(select);
 	return (++length);
 }
@@ -453,8 +588,8 @@ int	myprint(char *aux, va_list args, vari *select)
 int	ft_printf(const char *input, ...)
 {
 	vari	*select;
-	int count;
-	char		*aux;
+	int		count;
+	char	*aux;
 
 	select = (vari *)malloc(sizeof(vari));
 	if (!select)
@@ -477,8 +612,8 @@ int main()
 	//char d = 'V';
 	//char e = '&';
 	//long l = -8723647987432;
-	//int count;
-	//int count2;
+	int count;
+	int count2;
 
 	//ft_printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
 	//printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
@@ -491,6 +626,8 @@ int main()
 	//ft_printf(" %.d\n", 0);
 	//printf(" %.d\n", 0);
 	//prinf("%d", UINT_MAX);
-	ft_printf("%.*d\n", -1, 0);
-	printf("%.*d\n", -8, 0);
+	count = ft_printf(" --0*%0*.0x*0 0*%0*.10x*0-- \n", -2, 0, 21, 1);
+	printf("count: %d\n", count);
+	count2 = printf(" --0*%0*.0x*0 0*%0*.10x*0-- \n", -2, 0, 21, 1);
+	printf("count2: %d\n", count2);
 }*/
