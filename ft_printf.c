@@ -6,7 +6,7 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/07/12 18:54:11 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/07/13 19:20:12 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,112 @@ vari	*reset_select(vari *select)
 }
 
 /*---START -C- <---*/
+
+void	ft_point_s(char *aux, int i, vari *select, va_list args)
+{
+	char *temp;
+
+	temp = ft_substr(aux, select->point + 1, (i - select->point) - 1);
+	if (ft_strchr(temp, '*') > 0)
+		select->space = va_arg(args, int);
+	else
+		select->space = ft_atoi(temp);
+	free(temp);
+}
+
+int	ft_size_s(char *aux, int i, int length, vari *select, va_list args)
+{
+	int		size;
+	char	*temp;
+
+	if (select->point > 0)
+	{
+		temp = ft_substr(aux, i - length, length - (i - select->point));
+		if (ft_strchr(temp, '*') > 0)
+			size = va_arg(args, int);
+		else
+			size = ft_atoi(temp);
+		free(temp);
+		if (size < 0)
+		{
+			size *= -1;
+			select->negative++;
+		}
+		ft_point_s(aux, i, select,args);
+	} 
+	else if (select->asterisk == 0)
+	{
+		temp = ft_substr(aux, i - length, length);
+		size = ft_atoi(temp);
+		free(temp);
+		if (size < 0)
+			size *= -1;
+	}
+	else
+	{
+		size = va_arg(args, int);
+		if (size < 0)
+		{
+			size *= -1;
+			select->negative++;
+		}
+	}
+	return (size);
+}
+/* select->space *.(*) restar a la impresion de str */
+void	ft_category_s(va_list args, vari *select, char *aux, int length, int i)
+{
+	char 	*str;
+	int		size;
+	int		x;
+
+	size = ft_size_s(aux, i, length, select, args);
+	str = va_arg(args, char *);
+	x = 0;
+	if (size > (int)ft_strlen(str))
+	{
+		if (select->negative > 0)
+		{
+			if (select->point->0)
+			{
+				if (select->space > 0)
+				{
+					while (x < ((int)ft_strlen(str) && select->space))
+						select->width += write(1, &str[x++], 1);
+					while (size-- > ((int)ft_strlen(str) && select->space))
+						select->width += write(1, " ", 1);
+				}
+				else
+				{
+					while (x < (int)ft_strlen(str))
+						select->width += write(1, &str[x++], 1);
+					while (size-- > (int)ft_strlen(str))
+						select->width += write(1, " ", 1);
+				}
+			}
+		}
+		else
+		{
+			if (select->space > 0)
+			{
+				while (size-- > (int)ft_strlen(str))
+					select->width += write(1, " ", 1);
+				while (size-- > 0 && (x < (int)ft_strlen(str) && select->space))
+					select->width += write(1, &str[x++], 1);
+			}
+			else
+			{
+				while (size-- > (int)ft_strlen(str))
+					select->width += write(1, " ", 1);
+				while (x < (x < (int)ft_strlen(str) && select->space))
+					select->width += write(1, &str[x++], 1);
+			}
+		}
+	}
+	else
+		while (x < (int)ft_strlen(str))
+			select->width += write(1, &str[x++], 1);
+}
 
 int	ft_size_c(char *aux, int i, int length, vari *select, va_list args)
 {
@@ -243,6 +349,27 @@ void	ft_check_sign(vari *select)
 		select->width += write(1, "+", 1);
 }
 
+
+char	*ft_value_u(va_list args, vari *select)
+{
+	unsigned int	number;
+	char			*inter;
+
+	number = (unsigned int)va_arg(args, int);
+	if (number == 0)
+		select->number++;
+	if (number < 0 && (int)number != INT_MIN)
+	{
+		select->plus++;
+		select->sign++;
+		number *= -1;
+	}
+	inter = ft_itoa(number);
+	if (select->number > 0 && select->space > 0 && select->zero == 0)
+		inter[0] = ' ';
+	return (inter);
+}
+
 char	*ft_value_d(va_list args, vari *select)
 {
 	int		number;
@@ -260,7 +387,6 @@ char	*ft_value_d(va_list args, vari *select)
 	inter = ft_itoa(number);
 	if (select->number > 0 && select->space > 0 && select->zero == 0)
 		inter[0] = ' ';
-	
 	return (inter);
 }
 
@@ -382,7 +508,10 @@ void	ft_category_d(va_list args, vari *select, char *aux, int length, int i)
 	int		size;
 	
 	size = ft_size_d(aux, i, length, select, args);
-	inter = ft_value_d(args, select);
+	if (aux[i] == 'u')
+		inter = ft_value_u(args, select);
+	else
+		inter = ft_value_d(args, select);
 	if (size > (int)ft_strlen(inter))
 	{
 		if (select->negative > 0)
@@ -559,7 +688,9 @@ int ft_percent(char *aux, int i, va_list args, vari *select)
 	}
 	if (aux[i] == 'c')
 		ft_category_c(args, select, aux, length, i);
-	if (aux[i] == 'd' || aux[i] == 'i')
+	if (aux[i] == 's')
+		ft_category_s(args, select, aux, length, i);
+	if (aux[i] == 'd' || aux[i] == 'i' || aux[i] == 'u')
 		ft_category_d(args, select, aux, length, i);
 	if (aux[i] == 'p' || aux[i] == 'x' || aux[i] == 'X')
 		ft_category_p(args, select, aux, length, i);
@@ -603,7 +734,8 @@ int	ft_printf(const char *input, ...)
 	free(select);
 	return (count);
 }
-/*
+
+
 int main()
 {
 	//int a = 23;
@@ -626,8 +758,10 @@ int main()
 	//ft_printf(" %.d\n", 0);
 	//printf(" %.d\n", 0);
 	//prinf("%d", UINT_MAX);
-	count = ft_printf(" --0*%0*.0x*0 0*%0*.10x*0-- \n", -2, 0, 21, 1);
-	printf("count: %d\n", count);
-	count2 = printf(" --0*%0*.0x*0 0*%0*.10x*0-- \n", -2, 0, 21, 1);
-	printf("count2: %d\n", count2);
-}*/
+	//count = ft_printf(" %*.s %.1s \n", 10, "123", "4567");
+	count = ft_printf(" %*.s %.1s \n", 10, "123", "4567");
+	printf("%d\n", count);
+	//count2 = printf(" %*.s %.1s \n", 10, "123", "4567");
+	count2 = printf("%-7.1s\n", "94793");
+	printf("%d\n", count2);
+}
