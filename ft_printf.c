@@ -6,7 +6,7 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/07/13 19:20:12 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/07/19 20:35:28 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ vari	*init_select(vari *select)
 	select->number = 0;
 	select->negative = 0;
 	select->asterisk = 0;
+	select->is_null = 0;
 
 	return (select);
 }
@@ -43,11 +44,22 @@ vari	*reset_select(vari *select)
 	select->z = 0;
 	select->negative = 0;
 	select->asterisk = 0;
+	select->is_null = 0;
 
 	return (select);
 }
 
 /*---START -C- <---*/
+
+int		its_negative(int num, vari *select)
+{
+	if (num < 0)
+	{
+		num *= -1;
+		select->negative++;
+	}
+	return (num);
+}
 
 void	ft_point2_s(char *aux, int i, vari *select, va_list args)
 {
@@ -66,19 +78,16 @@ int	ft_size_s(char *aux, int i, int length, vari *select, va_list args)
 	int		size;
 	char	*temp;
 
+	size = 0;
 	if (select->point > 0)
 	{
 		temp = ft_substr(aux, i - length, length - (i - select->point));
 		if (ft_strchr(temp, '*') > 0)
-			size = va_arg(args, int);
+			select->pad = va_arg(args, int);
 		else
-			size = ft_atoi(temp);
+			select->pad = ft_atoi(temp);
 		free(temp);
-		if (size < 0)
-		{
-			size *= -1;
-			select->negative++;
-		}
+		size = its_negative(size, select);
 		ft_point2_s(aux, i, select,args);
 	} 
 	else if (select->asterisk == 0)
@@ -86,113 +95,113 @@ int	ft_size_s(char *aux, int i, int length, vari *select, va_list args)
 		temp = ft_substr(aux, i - length, length);
 		size = ft_atoi(temp);
 		free(temp);
-		if (size < 0)
-			size *= -1;
+		size = its_negative(size, select);
 	}
 	else
 	{
 		size = va_arg(args, int);
-		if (size < 0)
-		{
-			size *= -1;
-			select->negative++;
-		}
+		size = its_negative(size, select);
 	}
-	select->point = size;
+	select->pad = its_negative(select->pad, select);
 	return (size);
 }
 /* select->space *.(*) restar a la impresion de str */
+
 void	ft_category_s(va_list args, vari *select, char *aux, int length, int i)
 {
 	char 	*str;
 	int		size;
 	int		x;
+	int		len;
 
 	size = ft_size_s(aux, i, length, select, args);
 	str = va_arg(args, char *);
-	if (size == 0)
-		select->point = (int)ft_strlen(str);
-	if (str == NULL || str == 0)
+	if (str == NULL)
+	{
 		str = "(null)";
+		select->is_null++;
+	}
+	len = (int)ft_strlen(str);
+	if ((len > select->space) && select->point > 0)
+		len = select->space;
 	x = 0;
-	if (size > 0)
+	if (select->is_null > 0)
+	{
+		if (select->pad > size)
+			size = select->pad;
+		if (select->space <= 0 && select->pad <= 0 && select->point > 0)
+		{
+			while (x < (int)ft_strlen(str))
+				select->width += write(1, &str[x++], 1);
+		}
+		else if (select->negative > 0)
+		{
+			while (x < len)
+			{
+				select->width += write(1, &str[x++], 1);
+				size--;
+			}
+			while (size-- > 0)
+				select->width += write(1, " ", 1);
+		}
+		else
+		{
+			while (size-- > len)
+				select->width += write(1, " ", 1);
+			while (len-- > 0)
+				select->width += write(1, &str[x++], 1);
+		}
+	}
+	else if (select->point > 0)
 	{
 		if (select->negative > 0)
 		{
-			if (select->point > 0)
+			if (select->pad > len)
 			{
-				if (select->space < (int)ft_strlen(str))
-				{
-					while (x < select->space && size--)
-						select->width += write(1, &str[x++], 1);
-					while (size-- > 0)
-						select->width += write(1, " ", 1);
-				}
-				else
-				{
-					while (x < (int)ft_strlen(str) && select->space--)
-						select->width += write(1, &str[x++], 1);
-					while (size-- > (int)ft_strlen(str) || select->space-- >= 0)
-						select->width += write(1, " ", 1);
-				}
+				while (len-- > 0 && select->pad--)
+					select->width += write(1, &str[x++], 1);
+				while (select->pad-- > 0)
+					select->width += write(1, " ", 1);
 			}
 			else
 			{
-				if ((int)ft_strlen(str) < size)
-				{
-					while (x < (int)ft_strlen(str) && size--)
-						select->width += write(1, &str[x++], 1);
-					while (size-- > 0)
-						select->width += write(1, " ", 1);
-				}
-				else if (select->space > 0)
-				{
-					while (x < (int)ft_strlen(str) && select->space--)
-						select->width += write(1, &str[x++], 1);
-					while (select->space >= 0)
-						select->width += write(1, " ", 1);
-				}
-				else
-				{
-					while (x < (int)ft_strlen(str))
-						select->width += write(1, &str[x++], 1);
-				}
+				while (len-- > 0)
+					select->width += write(1, &str[x++], 1);
 			}
 		}
 		else
 		{
-			if (select->point > 0)
+			if (select->pad > len)
 			{
-				if (select->space < (int)ft_strlen(str))
-				{
-					while (select->space < size--)
-						select->width += write(1, " ", 1);
-					while (size-- >= 0)
-						select->width += write(1, &str[x++], 1);
-				}
-				else
-				{
-					while ((int)ft_strlen(str) < size--)
-						select->width += write(1, " ", 1);
-					while (size-- >= 0)
-						select->width += write(1, &str[x++], 1);
-				}
+				while (select->pad-- > len)
+					select->width += write(1, " ", 1);
+				while (len-- > 0)
+					select->width += write(1, &str[x++], 1);
 			}
+			else if (select->space == 0 && select->pad == 0)
+				select->point++;
 			else
 			{
-				if ((int)ft_strlen(str) < size)
-				{
-					while ((int)ft_strlen(str) < size--)
-						select->width += write(1, " ", 1);
-					while (size-- >= 0)
-						select->width += write(1, &str[x++], 1);
-				}
-				else
-				{
-					while (x < (int)ft_strlen(str))
-						select->width += write(1, &str[x++], 1);
-				}
+				while (len-- > 0)
+					select->width += write(1, &str[x++], 1);
 			}
+		}
+	}
+	else if (size > len)
+	{
+		if (select->negative > 0)
+		{
+			while (len-- > 0 && size--)
+				select->width += write(1, &str[x++], 1);
+			while (size-- > 0)
+				select->width += write(1, " ", 1);
+		}
+		else
+		{
+			while (size-- > len)
+				select->width += write(1, " ", 1);
+			while (len-- > 0)
+				select->width += write(1, &str[x++], 1);
 		}
 	}
 	else
@@ -202,8 +211,6 @@ void	ft_category_s(va_list args, vari *select, char *aux, int length, int i)
 			while (select->space-- > 0)
 				select->width += write(1, &str[x++], 1);
 		}
-		else if (select->point > 0 && select->space == 0)
-			select->point++;
 		else
 		{
 			while (x < (int)ft_strlen(str))
@@ -663,7 +670,7 @@ char	*ft_p_hexa(char *inter, char *aux, int x)
 	free(inter);
 	return (hexa_g);
 }
-/*
+
 char	*ft_value_p(va_list args, char *aux, int x, vari *select)
 {
 	unsigned long long		number;
@@ -727,7 +734,7 @@ void	ft_category_p(va_list args, vari *select, char *aux, int length, int i)
 		ft_nosize_d(select, inter, size);
 	free(inter);
 }
-*/
+
 /*---end P---*/
 int ft_percent(char *aux, int i, va_list args, vari *select)
 {
@@ -752,8 +759,8 @@ int ft_percent(char *aux, int i, va_list args, vari *select)
 		ft_category_s(args, select, aux, length, i);
 	if (aux[i] == 'd' || aux[i] == 'i' || aux[i] == 'u')
 		ft_category_d(args, select, aux, length, i);
-	/*if (aux[i] == 'p' || aux[i] == 'x' || aux[i] == 'X')
-		ft_category_p(args, select, aux, length, i);*/
+	if (aux[i] == 'p' || aux[i] == 'x' || aux[i] == 'X')
+		ft_category_p(args, select, aux, length, i);
 	reset_select(select);
 	return (++length);
 }
@@ -806,6 +813,7 @@ int main()
 	//long l = -8723647987432;
 	int count;
 	int count2;
+	//char *s_hidden = "hi low\0don't print me lol\0";
 
 	//ft_printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
 	//printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
@@ -819,9 +827,9 @@ int main()
 	//printf(" %.d\n", 0);
 	//prinf("%d", UINT_MAX);
 	//count = ft_printf(" %*.s %.1s \n", 10, "123", "4567");
-	count = ft_printf("%.3s\n", "hello");
+	count = ft_printf("%.*s\n", -3, (void *)0);
 	printf("%d\n", count);
 	//count2 = printf(" %*.s %.1s \n", 10, "123", "4567");
-	count2 = printf("%.3s\n", "hello");
+	count2 = printf("%.*s\n", -3, (void *)0);
 	printf("%d\n", count2);
 }*/

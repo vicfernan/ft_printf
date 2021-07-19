@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "printflib.h": "c",
+        "iostream": "cpp"
+    }
+}
