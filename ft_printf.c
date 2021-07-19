@@ -49,7 +49,7 @@ vari	*reset_select(vari *select)
 
 /*---START -C- <---*/
 
-void	ft_point_s(char *aux, int i, vari *select, va_list args)
+void	ft_point2_s(char *aux, int i, vari *select, va_list args)
 {
 	char *temp;
 
@@ -79,7 +79,7 @@ int	ft_size_s(char *aux, int i, int length, vari *select, va_list args)
 			size *= -1;
 			select->negative++;
 		}
-		ft_point_s(aux, i, select,args);
+		ft_point2_s(aux, i, select,args);
 	} 
 	else if (select->asterisk == 0)
 	{
@@ -98,6 +98,7 @@ int	ft_size_s(char *aux, int i, int length, vari *select, va_list args)
 			select->negative++;
 		}
 	}
+	select->point = size;
 	return (size);
 }
 /* select->space *.(*) restar a la impresion de str */
@@ -109,51 +110,109 @@ void	ft_category_s(va_list args, vari *select, char *aux, int length, int i)
 
 	size = ft_size_s(aux, i, length, select, args);
 	str = va_arg(args, char *);
+	if (size == 0)
+		select->point = (int)ft_strlen(str);
+	if (str == NULL || str == 0)
+		str = "(null)";
 	x = 0;
-	if (size > (int)ft_strlen(str))
+	if (size > 0)
 	{
 		if (select->negative > 0)
 		{
-			if (select->point->0)
+			if (select->point > 0)
 			{
-				if (select->space > 0)
+				if (select->space < (int)ft_strlen(str))
 				{
-					while (x < ((int)ft_strlen(str) && select->space))
+					while (x < select->space && size--)
 						select->width += write(1, &str[x++], 1);
-					while (size-- > ((int)ft_strlen(str) && select->space))
+					while (size-- > 0)
+						select->width += write(1, " ", 1);
+				}
+				else
+				{
+					while (x < (int)ft_strlen(str) && select->space--)
+						select->width += write(1, &str[x++], 1);
+					while (size-- > (int)ft_strlen(str) || select->space-- >= 0)
+						select->width += write(1, " ", 1);
+				}
+			}
+			else
+			{
+				if ((int)ft_strlen(str) < size)
+				{
+					while (x < (int)ft_strlen(str) && size--)
+						select->width += write(1, &str[x++], 1);
+					while (size-- > 0)
+						select->width += write(1, " ", 1);
+				}
+				else if (select->space > 0)
+				{
+					while (x < (int)ft_strlen(str) && select->space--)
+						select->width += write(1, &str[x++], 1);
+					while (select->space >= 0)
 						select->width += write(1, " ", 1);
 				}
 				else
 				{
 					while (x < (int)ft_strlen(str))
 						select->width += write(1, &str[x++], 1);
-					while (size-- > (int)ft_strlen(str))
-						select->width += write(1, " ", 1);
 				}
 			}
 		}
 		else
 		{
-			if (select->space > 0)
+			if (select->point > 0)
 			{
-				while (size-- > (int)ft_strlen(str))
-					select->width += write(1, " ", 1);
-				while (size-- > 0 && (x < (int)ft_strlen(str) && select->space))
-					select->width += write(1, &str[x++], 1);
+				if (select->space < (int)ft_strlen(str))
+				{
+					while (select->space < size--)
+						select->width += write(1, " ", 1);
+					while (size-- >= 0)
+						select->width += write(1, &str[x++], 1);
+				}
+				else
+				{
+					while ((int)ft_strlen(str) < size--)
+						select->width += write(1, " ", 1);
+					while (size-- >= 0)
+						select->width += write(1, &str[x++], 1);
+				}
 			}
 			else
 			{
-				while (size-- > (int)ft_strlen(str))
-					select->width += write(1, " ", 1);
-				while (x < (x < (int)ft_strlen(str) && select->space))
-					select->width += write(1, &str[x++], 1);
+				if ((int)ft_strlen(str) < size)
+				{
+					while ((int)ft_strlen(str) < size--)
+						select->width += write(1, " ", 1);
+					while (size-- >= 0)
+						select->width += write(1, &str[x++], 1);
+				}
+				else
+				{
+					while (x < (int)ft_strlen(str))
+						select->width += write(1, &str[x++], 1);
+				}
 			}
 		}
 	}
 	else
-		while (x < (int)ft_strlen(str))
-			select->width += write(1, &str[x++], 1);
+	{
+		if (select->space > 0)
+		{
+			while (select->space-- > 0)
+				select->width += write(1, &str[x++], 1);
+		}
+		else if (select->point > 0 && select->space == 0)
+			select->point++;
+		else
+		{
+			while (x < (int)ft_strlen(str))
+				select->width += write(1, &str[x++], 1);
+		}
+	}
 }
+
+/* controlar (*).* menor que length */
 
 int	ft_size_c(char *aux, int i, int length, vari *select, va_list args)
 {
@@ -604,7 +663,7 @@ char	*ft_p_hexa(char *inter, char *aux, int x)
 	free(inter);
 	return (hexa_g);
 }
-
+/*
 char	*ft_value_p(va_list args, char *aux, int x, vari *select)
 {
 	unsigned long long		number;
@@ -668,6 +727,7 @@ void	ft_category_p(va_list args, vari *select, char *aux, int length, int i)
 		ft_nosize_d(select, inter, size);
 	free(inter);
 }
+*/
 /*---end P---*/
 int ft_percent(char *aux, int i, va_list args, vari *select)
 {
@@ -692,8 +752,8 @@ int ft_percent(char *aux, int i, va_list args, vari *select)
 		ft_category_s(args, select, aux, length, i);
 	if (aux[i] == 'd' || aux[i] == 'i' || aux[i] == 'u')
 		ft_category_d(args, select, aux, length, i);
-	if (aux[i] == 'p' || aux[i] == 'x' || aux[i] == 'X')
-		ft_category_p(args, select, aux, length, i);
+	/*if (aux[i] == 'p' || aux[i] == 'x' || aux[i] == 'X')
+		ft_category_p(args, select, aux, length, i);*/
 	reset_select(select);
 	return (++length);
 }
@@ -735,7 +795,7 @@ int	ft_printf(const char *input, ...)
 	return (count);
 }
 
-
+/*
 int main()
 {
 	//int a = 23;
@@ -759,9 +819,9 @@ int main()
 	//printf(" %.d\n", 0);
 	//prinf("%d", UINT_MAX);
 	//count = ft_printf(" %*.s %.1s \n", 10, "123", "4567");
-	count = ft_printf(" %*.s %.1s \n", 10, "123", "4567");
+	count = ft_printf("%.3s\n", "hello");
 	printf("%d\n", count);
 	//count2 = printf(" %*.s %.1s \n", 10, "123", "4567");
-	count2 = printf("%-7.1s\n", "94793");
+	count2 = printf("%.3s\n", "hello");
 	printf("%d\n", count2);
-}
+}*/
