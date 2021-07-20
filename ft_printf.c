@@ -6,7 +6,7 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:35:11 by vifernan          #+#    #+#             */
-/*   Updated: 2021/07/19 20:35:28 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/07/20 20:02:59 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ vari	*init_select(vari *select)
 	select->plus = 0;
 	select->pad = 0;
 	select->z = 0;
+	select->s = 0;
 	select->number = 0;
 	select->negative = 0;
 	select->asterisk = 0;
@@ -40,6 +41,7 @@ vari	*reset_select(vari *select)
 	select->sign = 0;
 	select->number = 0;
 	select->plus = 0;
+	select->s = 0;
 	select->pad = 0;
 	select->z = 0;
 	select->negative = 0;
@@ -115,6 +117,9 @@ void	ft_category_s(va_list args, vari *select, char *aux, int length, int i)
 	int		len;
 
 	size = ft_size_s(aux, i, length, select, args);
+	//printf("PAD   %d\n", select->pad);
+	//printf("SAPACE   %d\n", select->space);
+	//printf("POINT   %d\n", select->point);
 	str = va_arg(args, char *);
 	if (str == NULL)
 	{
@@ -122,7 +127,7 @@ void	ft_category_s(va_list args, vari *select, char *aux, int length, int i)
 		select->is_null++;
 	}
 	len = (int)ft_strlen(str);
-	if ((len > select->space) && select->point > 0)
+	if ((len > select->space && select->space >= 0) && select->point > 0)
 		len = select->space;
 	x = 0;
 	if (select->is_null > 0)
@@ -328,6 +333,7 @@ int	ft_point_z(char *aux, int i, vari *select, va_list args, int size)
 	{
 		select->zero *= -1;
 		select->negative++;
+		select->pad++;
 	}
 	free(temp);
 	return (select->zero);
@@ -380,10 +386,15 @@ int ft_nast_npoint(char *aux, int i, int length, vari *select, int size)
 int	ft_size_d(char *aux, int i, int length, vari *select, va_list args)
 {
 	int		size;
+	char	*temp;
 
 	size = 0;
-	if (aux[1] == '0')
+	temp = ft_substr(aux, i - length, length);
+	if (temp[0] == '0')
 		select->z++;
+	if (temp[0] == ' ')
+		select->s++;
+	free(temp);
 	if (select->point > 0)
 	{
 		if (select->plus > 0)
@@ -456,6 +467,7 @@ char	*ft_value_d(va_list args, vari *select)
 	return (inter);
 }
 
+//aqui!!!!!!!!!!!
 void	ft_s_neg_point(vari *select, int size, char *inter)
 {
 	int i;
@@ -465,8 +477,16 @@ void	ft_s_neg_point(vari *select, int size, char *inter)
 		size++;
 	if (select->plus > 0 && size--)
 		ft_check_sign(select);
-	while (select->zero-- > (int)ft_strlen(inter) && size--)
-		select->width += write(1, "0", 1);
+	if (select->pad > 0)
+	{
+		while (select->zero-- > (int)ft_strlen(inter))
+			size--;
+	}
+	else
+	{
+		while (select->zero-- > (int)ft_strlen(inter) && size--)
+			select->width += write(1, "0", 1);
+	}
 	while (inter[i] != '\0' && size--)
 		select->width += write(1, &inter[i++], 1);
 	while (size-- > 0)
@@ -490,6 +510,8 @@ int	ft_neg_point_check(vari *select, int size, char *inter)
 {
 	if (select->zero > (int)ft_strlen(inter))
 	{
+		if (select->s > 0)
+			size--;
 		while (select->space-- > select->zero && size--)
 			select->width += write(1, " ", 1);
 		if (select->plus > 0 && size--)
@@ -589,8 +611,10 @@ void	ft_category_d(va_list args, vari *select, char *aux, int length, int i)
 		}
 		else
 		{
+			if (select->s > 0 && size--)
+				select->width += write(1, " ", 1);
 			if (select->point > 0)
-				ft_neg_point(select, size, inter);	
+				ft_neg_point(select, size, inter);
 			else
 				ft_z_check(select, size, inter);
 		}
@@ -736,6 +760,43 @@ void	ft_category_p(va_list args, vari *select, char *aux, int length, int i)
 }
 
 /*---end P---*/
+
+/*---START -%- <---*/
+void	ft_category_percent(va_list args, vari *select, char *aux, int length, int i)
+{
+	int		size;
+	char	c;
+	char	fill;
+	char	*temp;
+
+	fill = ' ';
+	temp = ft_substr(aux, i - length, length);
+	if (temp[0] == '0')
+		fill = '0';
+	free(temp);
+	size = ft_size_d(aux, i, length, select, args);
+	c = '%';
+	if (size > 0)
+	{
+		if (select->negative > 0)
+		{
+			select->width += write(1, &c, 1);
+			while (size-- > 1)
+				select->width += write(1, &fill, 1);
+		}
+		else
+		{
+			while (size-- > 1)
+				select->width += write(1, &fill, 1);
+			select->width += write(1, &c, 1);
+		}
+	}
+	else
+		select->width += write(1, &c, 1);
+
+}
+
+/*--end -%- --*/
 int ft_percent(char *aux, int i, va_list args, vari *select)
 {
 	int 		length;
@@ -761,6 +822,8 @@ int ft_percent(char *aux, int i, va_list args, vari *select)
 		ft_category_d(args, select, aux, length, i);
 	if (aux[i] == 'p' || aux[i] == 'x' || aux[i] == 'X')
 		ft_category_p(args, select, aux, length, i);
+	if (aux[i] == '%')
+		ft_category_percent(args, select, aux, length, i);
 	reset_select(select);
 	return (++length);
 }
@@ -805,31 +868,14 @@ int	ft_printf(const char *input, ...)
 /*
 int main()
 {
-	//int a = 23;
-	//char b = 'i';
-	//char c = 'c';
-	//char d = 'V';
-	//char e = '&';
-	//long l = -8723647987432;
 	int count;
 	int count2;
-	//char *s_hidden = "hi low\0don't print me lol\0";
 
-	//ft_printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
-	//printf("*** %-10c hola %c%c%c %*c\n", 'c', d, b, c, 100, e);
-	//printf("*PRINTF* %d %i %zu %d %s %cictor          \n\n\n\n\n", a, b, l, c, e, d);
-	//ft_printf("%1*0d\n", 400);
-	//ft_printf("%*.*d\n", 5, 25, 400);
-	//printf("%*.*d\n", 5, 25, 400);
-	//ft_printf(" %100.d\n", 0);
-	//printf(" %100.d\n", 0);
-	//ft_printf(" %.d\n", 0);
-	//printf(" %.d\n", 0);
-	//prinf("%d", UINT_MAX);
-	//count = ft_printf(" %*.s %.1s \n", 10, "123", "4567");
-	count = ft_printf("%.*s\n", -3, (void *)0);
+	count = ft_printf("%-32p%-32p%-32p%-32p%-32p%-32p%-32p%-32p%-32p%-32p%-32p%-32p", &a01, &a02, &a03, &a04, &a05, &a06, &a07, &a08, &a09, &a10);
+	//count = ft_printf("% 04d\n", 42);
 	printf("%d\n", count);
-	//count2 = printf(" %*.s %.1s \n", 10, "123", "4567");
-	count2 = printf("%.*s\n", -3, (void *)0);
+	
+	//count2 = printf("% 04d\n", 42);
+	count2 = printf("%% *.5i 42 == |% *.5i|\n", 4, 42);
 	printf("%d\n", count2);
 }*/
