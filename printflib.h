@@ -6,7 +6,7 @@
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/12 11:39:30 by vifernan          #+#    #+#             */
-/*   Updated: 2021/07/20 19:11:16 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/08/15 16:24:52 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ typedef struct variables{
 	int	asterisk;
 	int	space;
 	int	pad;
+	int next_s;
+	int prueba;
 	int is_null;
 } vari;
 

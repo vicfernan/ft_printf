@@ -6,13 +6,13 @@
 #    By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/08 19:55:57 by vifernan          #+#    #+#              #
-#    Updated: 2021/07/08 12:50:29 by vifernan         ###   ########.fr        #
+#    Updated: 2021/08/14 15:02:16 by vifernan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME	= libftprintf.a
 
-CFLAGS	= -Wall -Wextra -Werror
+CFLAGS	= -Wall
 
 SRCS	= ft_printf.c \
 
