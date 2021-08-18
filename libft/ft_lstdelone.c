@@ -6,13 +6,13 @@
 /*   By: vifernan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/27 16:55:07 by vifernan          #+#    #+#             */
-/*   Updated: 2021/04/27 17:48:58 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/08/18 20:11:26 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void ft_lstdelone(t_list *lst, void (*del)(void*))
+void	ft_lstdelone(t_list *lst, void (*del)(void*))
 {
 	if (lst)
 	{

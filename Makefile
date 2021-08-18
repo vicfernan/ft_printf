@@ -6,7 +6,7 @@
 #    By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/08 19:55:57 by vifernan          #+#    #+#              #
-#    Updated: 2021/08/14 15:02:16 by vifernan         ###   ########.fr        #
+#    Updated: 2021/08/18 19:01:24 by vifernan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,21 @@ NAME	= libftprintf.a
 
 CFLAGS	= -Wall
 
-SRCS	= ft_printf.c \
+SRCS	= 	ft_printf.c \
+			ft_percent.c \
+			ft_category_p.c	\
+			ft_size_p.c	\
+			ft_category_c.c	\
+			ft_category_d.c	\
+			ft_category_s.c	\
+			ft_write_s_1.c	\
+			ft_write_s_2.c	\
+			ft_write_nosize.c	\
+			ft_write_size.c	\
+			ft_size_d.c	\
+			ft_on_off.c	\
+			ft_checker.c	\
+
 
 OBJS	= $(SRCS:.c=.o)
 
@@ -47,7 +61,7 @@ fclean:
 re: fclean all
 
 test: all
-	@gcc $(FLAGS) ft_printf.c $(NAME)
+	@gcc $(FLAGS) $(SRCS) $(NAME)
 	@echo "$(BCyan)[EJECUTADO]$(NO_COLOR)"
 	@./a.out | cat -e
 

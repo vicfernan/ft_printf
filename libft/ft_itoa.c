@@ -6,7 +6,7 @@
 /*   By: vifernan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/16 11:16:40 by vifernan          #+#    #+#             */
-/*   Updated: 2021/05/18 15:38:33 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/08/18 20:06:52 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ char	ft_negative(long long nb, char *str)
 
 char	*ft_itoa(long long nb)
 {
-	char	*str;
+	char		*str;
 	long long	i;
 	long long	flag;
 

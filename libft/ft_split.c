@@ -6,7 +6,7 @@
 /*   By: vifernan <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/14 17:30:23 by vifernan          #+#    #+#             */
-/*   Updated: 2021/04/27 15:02:43 by vifernan         ###   ########.fr       */
+/*   Updated: 2021/08/18 20:07:46 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,13 +98,4 @@ char	**ft_split(char const *s, char c)
 		}
 	}
 	return (tab);
-}
-
-int main()
-{
-	char *a = "uno dos tres       ";
-	char **t = ft_split(a, ' ');
-
-	printf("%c\n", t[0][200]);
-	printf("%s\n", t[1]);
 }
