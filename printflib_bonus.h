@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   printflib.h                                        :+:      :+:    :+:   */
+/*   printflib_bonus.h                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vifernan <vifernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/05/12 11:39:30 by vifernan          #+#    #+#             */
-/*   Updated: 2021/08/19 17:38:02 by vifernan         ###   ########.fr       */
+/*   Created: 2021/08/19 17:38:55 by vifernan          #+#    #+#             */
+/*   Updated: 2021/08/19 17:43:39 by vifernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PRINTFLIB_H
-# define PRINTFLIB_H
+#ifndef PRINTFLIB_BONUS_H
+# define PRINTFLIB_BONUS_H
 
 # include <stdlib.h>
 # include <stdio.h>
